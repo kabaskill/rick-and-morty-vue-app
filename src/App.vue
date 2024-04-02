@@ -4,11 +4,10 @@ import Pages from "./components/Pages.vue";
 import { Progress } from "@/components/ui/progress";
 import DarkMode from "./components/DarkMode.vue";
 
-const artificalDelay = 800;
 const progress = ref(0);
 
 const chars = ref(null);
-const charPageNumber = ref(1);
+const charPageNumber = ref(null);
 
 const eps = ref(null);
 const epPageNumber = ref(1);
@@ -16,14 +15,12 @@ const epPageNumber = ref(1);
 const baseUrl = "https://rickandmortyapi.com/api";
 
 fetchChars();
-updateProgress();
 
 watch(charPageNumber, fetchChars);
 
-
 function updateProgress() {
   progress.value = 0;
-  const frequency = artificalDelay / 10;
+  const frequency = 800 / 10;
 
   const interval = setInterval(() => {
     if (progress.value < 100) {
@@ -36,17 +33,14 @@ function updateProgress() {
 }
 
 async function fetchChars(page = 1) {
-  chars.value = null;
   charPageNumber.value = page;
+  console.log("🚀  charPageNumber.value:", charPageNumber.value);
 
-  setTimeout(async () => {
-    const responseChars = await fetch(`${baseUrl}/character?page=${charPageNumber.value}`);
-    const responseEps = await fetch(`${baseUrl}/episode`);
+  const responseChars = await fetch(`${baseUrl}/character?page=${charPageNumber.value}`);
+  const responseEps = await fetch(`${baseUrl}/episode`);
 
-    chars.value = await responseChars.json();
-    eps.value = await responseEps.json();
-  }, artificalDelay);
-  updateProgress();
+  chars.value = await responseChars.json();
+  eps.value = await responseEps.json();
 }
 </script>
 
@@ -61,10 +55,7 @@ async function fetchChars(page = 1) {
   </header>
 
   <main>
-    <div
-      v-if="chars"
-      class="p-4 my-4 size-full dark:bg-gray-900 bg-slate-200 border flex flex-col rounded-xl"
-    >
+    <div class="p-4 my-4 size-full dark:bg-gray-900 bg-slate-200 border flex flex-col rounded-xl">
       <h2 class="text-xl">All Characters</h2>
       <ul v-if="chars" class="grid grid-cols-7 my-4">
         <a
@@ -78,9 +69,9 @@ async function fetchChars(page = 1) {
         </a>
       </ul>
 
-      <Pages :totalPages="chars.info.pages ?? 0" class="self-center" @page-changed="fetchChars" />
+      <Progress :modelValue="progress" v-else />
+      <Pages :totalPages="chars.info.pages ?? 0" class="self-center" @update:page="fetchChars" />
     </div>
-    <Progress :modelValue="progress" v-else />
 
     <!-- <div class="p-2 my-4 bg-gray-900 border flex flex-col">
       <h2 class="text-xl">All Episodes</h2>

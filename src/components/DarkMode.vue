@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
 export default {
   setup() {
@@ -15,6 +15,12 @@ export default {
       isDarkMode.value = !isDarkMode.value;
       document.body.classList.toggle("dark", isDarkMode.value);
     };
+
+    onMounted(() => {
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        toggleDarkMode();
+      }
+    });
 
     return { isDarkMode, toggleDarkMode };
   },
